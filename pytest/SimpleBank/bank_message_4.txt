@@ -1,0 +1,3 @@
+timestamp: 1536639297.452532
+command: withdraw 2
+balance: 47
