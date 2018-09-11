@@ -1,0 +1,3 @@
+timestamp: 1536645659.7158248
+requested file: /Users/xucheng/Desktop/NetworkSecurity/pytest/SimpleWebServer/test.txt
+response code: 200
