@@ -1,3 +1,0 @@
-timestamp: 1536639269.1154728
-command: deposit 25
-response: OK
