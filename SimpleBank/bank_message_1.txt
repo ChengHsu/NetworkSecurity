@@ -1,3 +1,0 @@
-timestamp: 1536639224.7414029
-command: balance
-balance: 0

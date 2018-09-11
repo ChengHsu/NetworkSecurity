@@ -1,3 +1,0 @@
-timestamp: 1536639269.115423
-command: deposit 25
-balance: 49
