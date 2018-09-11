@@ -1,3 +1,0 @@
-timestamp: 1536638933.28459
-problem: * 2 + 3 5
-result: 16.0

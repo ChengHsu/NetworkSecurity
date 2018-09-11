@@ -1,2 +1,0 @@
-timestamp: 1536638933.2847202
-response: 16.0

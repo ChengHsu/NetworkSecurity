@@ -1,2 +1,0 @@
-Timestamp: 1536637666.166282
-Echoed data: hello again

@@ -1,3 +1,0 @@
-timestamp: 1536640115.289539
-question: Hey
-response: You really expect me to answer that?

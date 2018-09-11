@@ -1,3 +1,0 @@
-timestamp: 1536640131.940762
-question: How are u
-response: It's Trump's fault!
