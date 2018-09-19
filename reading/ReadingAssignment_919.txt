@@ -1,0 +1,7 @@
+1. For operating system access control, I think it's so efficient to create
+groups so that we don't have to give specific access to each member of a system
+because right of access control duplicates in a group of members who have the
+same role.
+2. I think the Sandboxing, which provides a restricted environment in which it
+has no access to the local hard disk is actually a really convenient and harmless
+ way to test the safety of suspicious code. It should be applied more widely.
