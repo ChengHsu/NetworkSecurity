@@ -1,0 +1,12 @@
+1.By reading Attacks of SYN Flooding, I get a better understanding of TCP/IP handshake,
+in which the recipient sends out as Y an encrypted version of X instead of keeping a copy
+of SYN packet.
+
+2.I didn't know the difference between Trojans, viruses and worms until I read 21.3, which
+specifies a Trojan is a malicious program, a worm is something replicates and a virus is a
+kind of worm which replicates by attaching itself to other programs.
+
+3.I can't see the difference between Misuse detection and Anomaly detection.
+
+4.Since the encryption can be much faster than decryption in TLS, it is not a good idea to
+let servers to do the decryprtion.
