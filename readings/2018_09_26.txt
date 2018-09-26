@@ -1,0 +1,9 @@
+1.I'm confused about the difference between ARP poisoning and MAC flooding.
+Since the poisoning is to update a host's cache with forged ARP entry and flooding
+is to flood switch using ARP packets. I think the only difference is the amount of
+ARP that is used.
+
+2.In the 3.Layer2/Layer3 impact, Why would the a router identifies the new MAC
+destination address for the packet ?
+
+3.What's the difference if both AH and ESP provide authentication functions?
