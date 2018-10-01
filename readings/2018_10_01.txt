@@ -1,0 +1,2 @@
+1.I'm impressed by the "sign the root" technology that are used in DNSSEC, but I assume full deployment is not that easy and costs a long time.
+2.For security, it is critical to know who has access to what, and why they are allowed access at any given time. I like the "Zero trust" and "Real time Trust" mechanism of BeyondCorp.
