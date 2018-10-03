@@ -1,0 +1,4 @@
+About timestamps mechanism that used in Kerberos to prevent replay attacks, I think
+it can not totally prevent replay attacks. Because if the replay attacks can be implemented
+in a short time, the server can not tell the attack since the timestamp is in an acceptable
+range of time.
