@@ -1,0 +1,8 @@
+1. I think the an advantage of IPSec is that it is transparent to its applications,
+and it has no impact on the higher network layers .Therefore IPSec is appropriate
+for securing real-time traffic.
+2. And the disadvantage to an IPSec remote-access approach is that once a computer
+is attached to the network secured by IPSec, all of the additional devices attached
+to that local network might also be able to gain access across the WAN to the
+corporate network.  So it's possible that a worm could easily spread to other
+drives on the corporate network.
