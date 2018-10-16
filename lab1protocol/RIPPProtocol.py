@@ -17,42 +17,24 @@ class RIPPProtocol(StackingProtocol):
     SCAN_INTERVAL = 0.02
     DEBUG_MODE = True
     LOSS_RATE = 0
+    MTU = 1500
 
     # State definitions
-    STATE_DESC = {
-        0: "DEFAULT",
-
-        100: "SERVER_LISTEN",
-        101: "SERVER_SYN_RCVD",
-        102: "SERVER_TRANSMISSION",
-        103: "SERVER_FIN_WAIT",
-        104: "SERVER_CLOSED",
-
-        200: "CLIENT_INITIAL_SYN",
-        201: "CLIENT_SYN_ACK",
-        202: "CLIENT_TRANSMISSION",
-        203: "CLIENT_FIN_WAIT",
-        204: "CLIENT_CLOSED"
-    }
-
-    STATE_DEFAULT = 0
-
-    STATE_SERVER_LISTEN = 100
-    STATE_SERVER_SYN_RCVD = 101
-    STATE_SERVER_TRANSMISSION = 102
-
-    STATE_SERVER_FIN_WAIT = 103
-    STATE_SERVER_CLOSED = 104
-
-    STATE_CLIENT_INITIAL_SYN = 200
-    STATE_CLIENT_SYN_SNT = 201
-    STATE_CLIENT_TRANSMISSION = 202
-    STATE_CLIENT_FIN_WAIT = 203
-    STATE_CLIENT_CLOSED = 204
+    DEFAULT = "DEFAULT"
+    SERVER_LISTEN = "SERVER_LISTEN"
+    SERVER_SYN_RCVD = "SERVER_SYN_RCVD"
+    SERVER_ESTABLISHED = "SERVER_ESTABLISHED"
+    SERVER_FIN_WAIT = "SERVER_FIN_WAIT"
+    SERVER_CLOSED = "SERVER_CLOSED"
+    CLIENT_INITIAL_SYN = "CLIENT_INITIAL_SYN"
+    CLIENT_SYN_SNT = "CLIENT_SYN_SNT"
+    CLIENT_ESTABLISHED = "CLIENT_ESTABLISHED"
+    CLIENT_FIN_WAIT = "CLIENT_FIN_WAIT"
+    CLIENT_CLOSED = "CLIENT_CLOSED"
 
     def __init__(self):
         super().__init__()
-        self.state = self.STATE_DEFAULT
+        self.state = self.DEFAULT
         self.transport = None
         self.deserializer = RIPPPacket.Deserializer()
         self.sendSeq = random.randint(0, 10000)
@@ -67,59 +49,59 @@ class RIPPProtocol(StackingProtocol):
         self.transport = transport
         #create SYN Packet
         synPkt = RIPPPacket()
-        synPkt.Type = synPkt.TYPE_SYN
+        synPkt.Type = synPkt.SYN
         synPkt.SeqNo = self.sendSeq
         synPkt.updateChecksum()
-        self.debug_logger ("Sending SYN packet with seq number " + str(self.sendSeq),'green')
+        self.debug_logger ("Sending SYN packet. Seq: " + str(self.sendSeq),'green')
         transport.write(synPkt.__serialize__())
 
 
     def sendSynAck(self, transport, synAck_seqNum):
         # create SYN-ACK Packet
         synAckPkt = RIPPPacket()
-        synAckPkt.Type = synAckPkt.TYPE_SYN + synAckPkt.TYPE_ACK
+        synAckPkt.Type = synAckPkt.SYN + synAckPkt.ACK
         synAckPkt.SeqNo = synAck_seqNum
         synAckPkt.AckNo = self.recvSeq
         synAckPkt.updateChecksum()
-        self.debug_logger("Sending SYN_ACK packet with seq number " + str(synAck_seqNum) +
+        self.debug_logger("Sending SYN_ACK packet.  Seq: " + str(synAck_seqNum) +
                       ", ack number " + str(self.recvSeq),'green')
         transport.write(synAckPkt.__serialize__())
 
     def sendAck(self, transport):
         # create ACK Packet
         ackPkt = RIPPPacket()
-        ackPkt.Type = ackPkt.TYPE_ACK
+        ackPkt.Type = ackPkt.ACK
         ackPkt.AckNo = self.recvSeq
         ackPkt.updateChecksum()
-        self.debug_logger("Sending ACK packet with ack number " + str(self.recvSeq) +
-              ", current state " + self.STATE_DESC[self.state],'green')
+        self.debug_logger("Sending ACK packet. Ack: " + str(self.recvSeq) +
+              ", current state " + self.state,'green')
         transport.write(ackPkt.__serialize__())
 
     def sendFin(self, transport):
         # create FIN Packet
         finPkt = RIPPPacket()
-        finPkt.Type = finPkt.TYPE_FIN
+        finPkt.Type = finPkt.FIN
         finPkt.SeqNo = self.sendSeq
         finPkt.updateChecksum()
-        self.debug_logger("Sending FIN packet with sequence number " + str(self.sendSeq) +
-                      ", current state " + self.STATE_DESC[self.state],'green')
+        self.debug_logger("Sending FIN packet.  Seq: " + str(self.sendSeq) +
+                      ", current state " + self.state,'green')
         transport.write(finPkt.__serialize__())
 
     def sendFinAck(self, transport):
         # create FIN Packet
         finAckPkt = RIPPPacket()
-        finAckPkt.Type = finAckPkt.TYPE_FIN + finAckPkt.TYPE_ACK
+        finAckPkt.Type = finAckPkt.FIN + finAckPkt.ACK
         finAckPkt.AckNo = self.recvSeq
         finAckPkt.updateChecksum()
-        self.debug_logger("Sending FIN_ACK packet with seq number " + str(self.sendSeq) +
-                    ", ack number " + str(self.recvSeq) + ", current state " + self.STATE_DESC[self.state],'green')
+        self.debug_logger("Sending FIN_ACK packet.  Seq: " + str(self.sendSeq) +
+                    ", ack number " + str(self.recvSeq) + ", current state " + self.state,'green')
         transport.write(finAckPkt.__serialize__())
 
-    def processDataPkt(self, pkt):
+    def recvDataPkt(self, pkt):
         if self.isClosing():
-            self.debug_logger("Closing, ignored data packet with seq " + str(pkt.SeqNo),'red')
+            self.debug_logger("Closing, ignored data packet.  Seq: " + str(pkt.SeqNo),'red')
         elif pkt.SeqNo == self.recvSeq:  # in order
-            self.debug_logger("Received DATA packet with sequence number " +
+            self.debug_logger("Received DATA packet.  Seq: " +
                   str(pkt.SeqNo),'blue')
             self.recvSeq = pkt.SeqNo + len(
                 pkt.Data)
@@ -130,18 +112,15 @@ class RIPPProtocol(StackingProtocol):
                 self.r = nextPkt.SeqNo + len(nextPkt.Data)
                 self.higherProtocol().data_received(nextPkt.Data)
         elif pkt.SeqNo > self.recvSeq:
-            self.debug_logger("Received DATA packet with higher sequence number " +
-                  str(pkt.SeqNo) + ", put it into buffer.",'blue')
+            self.debug_logger("Received Data packet with bigger Seq: " +str(pkt.SeqNo) + ", " + str(self.recvSeq) + "expected.",'blue')
             self.receivedDataBuffer[pkt.SeqNo] = pkt
         else:
-            self.debug_logger("ERROR: Received DATA packet with lower sequence number " +
-                  str(pkt.SeqNo) + ",current ack_num is : {!r}, discard it.".format(
-                        self.recvSeq),'red')
+            self.debug_logger("Received DATA packet with smaller Seq: " + str(pkt.SeqNo) +  ", " + str(self.recvSeq) + "expected.".format(self.recvSeq),'red')
         self.sendAck(self.transport)
 
 
 
-    def processAckPkt(self, pkt):
+    def recvAckPkt(self, pkt):
         self.debug_logger("Received ACK packet with Ack Num: " +
                       str(pkt.AckNo),'blue')
         latestAckNumber = pkt.AckNo

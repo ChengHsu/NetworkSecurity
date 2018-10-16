@@ -9,10 +9,10 @@ class RIPPPacket(PacketType):
     DEFINITION_IDENTIFIER = "RIPP.Packet"
     DEFINITION_VERSION = "1.0"
     # RIPPPacket type
-    TYPE_SYN = "SYN"
-    TYPE_ACK = "ACK"
-    TYPE_FIN = "FIN"
-    TYPE_DATA = "DATA"
+    SYN = "SYN"
+    ACK = "ACK"
+    FIN = "FIN"
+    DATA = "DATA"
 
     FIELDS = [
         ("Type", STRING),
