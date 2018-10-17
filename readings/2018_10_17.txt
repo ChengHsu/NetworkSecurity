@@ -1,0 +1,4 @@
+I'm did some reading about DNSSEC and learned that DNSSEC does decrease the risk
+of becoming a victim of a fraud but it doesn't stop all types of fraud. For example,
+attacks such as distributed denial of service. And it doesn't protect against attacks
+on other levels such as IP level.
