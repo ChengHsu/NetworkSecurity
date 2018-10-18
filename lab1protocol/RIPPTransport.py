@@ -32,10 +32,10 @@ class RIPPTransport(StackingTransport):
 				pktNo += 1
 				ackNumber = self.protocol.sendSeq + len(sentData)
 				# Window is not full
-				if len(self.protocol.sentDataCache) <= self.protocol.WINDOW_SIZE:
+				if len(self.protocol.sentDataBuffer) <= self.protocol.WINDOW_SIZE:
 					self.protocol.debug_logger("Sending packet {!r}, sequence number: {!r}".format(pktNo,dataPkt.SeqNo),'blue')
 					self.protocol.transport.write(dataPkt.__serialize__())
-					self.protocol.sentDataCache[ackNumber] = (dataPkt, time.time())
+					self.protocol.sentDataBuffer[ackNumber] = (dataPkt, time.time())
 				# Window is full, sending to sendingDataBuffer
 				else:
 					self.protocol.debug_logger(
@@ -47,6 +47,7 @@ class RIPPTransport(StackingTransport):
 				"RIPPTransport: Data transmission completed, sent: {!r} packets".format(pktNo), 'blue')
 		else:
 			self.protocol.debug_logger("RIPPTransport: Failed to write.", 'red')
+
 
 
 	def close(self):

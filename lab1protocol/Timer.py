@@ -26,7 +26,6 @@ async def main():
     print('\nfirst example:')
     timer = Timer(2, timeout_callback)  # set timer for two seconds
     await asyncio.sleep(2.5)  # wait to see timer works
-
     print('\nsecond example:')
     timer = Timer(2, timeout_callback)  # set timer for two seconds
     await asyncio.sleep(1)
