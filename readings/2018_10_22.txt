@@ -1,0 +1,3 @@
+I think several advantages of using Kerberos over other systems are:
+1. Mutual authentication based on encrypted tickets through a trusted third-party
+2. Renewable session which only requires one time authentication
