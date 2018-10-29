@@ -2,41 +2,23 @@ import asyncio
 
 
 class Timer:
-    def __init__(self, timeout, callback):
-        self._timeout = timeout
+    def __init__(self, timeout, loop, callback, arg):
         self._timeout = timeout
         self._callback = callback
-        self._task = asyncio.ensure_future(self._job())
-
-
-    async def _job(self):
-        await asyncio.sleep(self._timeout)
-        await self._callback()
+        self._callback_arg = arg
+        self._loop = loop
+        self._task = self._loop.call_later(timeout,self._callback,self._callback_arg)
 
     def cancel(self):
         self._task.cancel()
 
 
-async def timeout_callback():
-    await asyncio.sleep(0.1)
-    print('echo!')
+class PopTimer:
+    def __init__(self, timeout,loop,callback):
+        self._timeout = timeout
+        self._callback = callback
+        self._loop = loop
+        self._task = self._loop.call_later(self._timeout, self._callback)
 
-
-async def main():
-    print('\nfirst example:')
-    timer = Timer(2, timeout_callback)  # set timer for two seconds
-    await asyncio.sleep(2.5)  # wait to see timer works
-    print('\nsecond example:')
-    timer = Timer(2, timeout_callback)  # set timer for two seconds
-    await asyncio.sleep(1)
-    timer.cancel()  # cancel it
-    await asyncio.sleep(1.5)  # and wait to see it won't call callback
-
-
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(loop)
-try:
-    loop.run_until_complete(main())
-finally:
-    loop.run_until_complete(loop.shutdown_asyncgens())
-    loop.close()
+    def cancel(self):
+        self._task.cancel()

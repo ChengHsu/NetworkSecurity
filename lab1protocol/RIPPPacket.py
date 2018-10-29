@@ -8,30 +8,31 @@ class RIPPPacket(PacketType):
 
     DEFINITION_IDENTIFIER = "RIPP.Packet"
     DEFINITION_VERSION = "1.0"
+
+    FIELDS = [
+        ("Type", STRING),
+        ("SeqNo", UINT32({Optional: True})),
+        ("AckNo", UINT32({Optional: True})),
+        ("Checksum", BUFFER({Optional: True})),
+        ("Data", BUFFER({Optional: True}))
+    ]
+
     # RIPPPacket type
     SYN = "SYN"
     ACK = "ACK"
     FIN = "FIN"
     DATA = "DATA"
 
-    FIELDS = [
-        ("Type", STRING),
-        ("SeqNo", UINT32({Optional: True})),
-        ("Checksum", BUFFER({Optional: True})),
-        ("AckNo", UINT32({Optional: True})),
-        ("Data", BUFFER({Optional: True}))
-    ]
-
     def __init__(self):
-	    super().__init__()
-	    self.Checksum = b""
+        super().__init__()
+        self.Checksum = b""
 
     def calculateChecksum(self):
         oldChecksum = self.Checksum
         self.Checksum = b""
         bytes = self.__serialize__()
         self.Checksum = oldChecksum
-        return (hashlib.sha256(bytes).hexdigest()).encode('utf-8')
+        return hashlib.sha256(bytes).digest()
 
     def updateChecksum(self):
         self.Checksum = self.calculateChecksum()

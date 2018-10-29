@@ -2,6 +2,7 @@ import asyncio
 from .RIPPPacket import RIPPPacket
 from .RIPPTransport import RIPPTransport
 from .RIPPProtocol import RIPPProtocol
+from .Timer import Timer
 import time
 
 class ServerProtocol(RIPPProtocol):
@@ -9,11 +10,15 @@ class ServerProtocol(RIPPProtocol):
         super().__init__()
         self.state = self.SERVER_LISTEN
         self.debug_logger("RIPP Server with state " + self.SERVER_LISTEN, 'green')
+
     def connection_made(self, transport):
         self.transport = transport
-
+        super().connection_made(transport)
 
     def data_received(self, data):
+        # Set stop timer
+        stop_timer = Timer(30,self.loop,self.shutdown,0)
+
         self.deserializer.update(data)
         for pkt in self.deserializer.nextPackets():
             if isinstance(pkt, RIPPPacket):
@@ -27,25 +32,22 @@ class ServerProtocol(RIPPProtocol):
                         self.sendSynAck(self.transport, synAck_seq)
                         self.sendSeq += 1
 
-                    # SYN-ACK
+                    # ACK for SYN-ACK
                     elif ("ACK" in pkt.Type) and (self.state == self.SERVER_SYN_RCVD):
 
                         if pkt.AckNo == self.sendSeq:
-                            self.debug_logger("Received SYN-ACK packet. Ack:{!r} ".format(pkt.AckNo),'blue')
-                            # Do not change sendSeq; follow the specifications
-                            # self.recvSeq = pkt.SeqNo + 1
+                            self.debug_logger("Received ACK for SYN-ACK packet. Ack:{!r} ".format(pkt.AckNo),'blue')
                             self.state = self.SERVER_ESTABLISHED
-
                             higherTransport = RIPPTransport(self.transport,self)
                             self.higherProtocol().connection_made(higherTransport)
-                            self.tasks.append(asyncio.ensure_future(self.checkTimeout()))
+
                         else:
                             self.debug_logger(
                                 "Wrong ACK packet. ACK: {!r}, expected: {!r}".format(
                                     pkt.AckNo, self.sendSeq + 1),'red')
 
                     # DATA
-                    elif ("DATA" in pkt.Type) and (self.state == self.SERVER_ESTABLISHED):
+                    elif ("DATA" in pkt.Type) and (self.state == self.SERVER_ESTABLISHED or self.state == self.SERVER_LISTEN):
                         self.recvDataPkt(pkt)
 
                     # ACK
@@ -57,6 +59,7 @@ class ServerProtocol(RIPPProtocol):
                             (("FIN" in pkt.Type) and (self.state == self.SERVER_FIN_WAIT)):
                         # After receiving FIN, sending FIN-ACk and close
                         self.debug_logger("Received FIN packet. Seq:{!r} ".format(pkt.SeqNo),'blue')
+
                         self.state = self.SERVER_FIN_WAIT
                         self.recvSeq = pkt.SeqNo + 1
                         self.sendFinAck(self.transport)
@@ -72,9 +75,9 @@ class ServerProtocol(RIPPProtocol):
                             self.transport.close()
 
                     else:
-                        self.debug_logger("Wrong Pkt: Seq: {!r}. Type: {!r}. Current State:{!r}".format(pkt.SeqNo,pkt.Type,self.state),'red')
+                        self.debug_logger("Wrong Pkt with Seq: {!r}. Type: {!r}. Current State:{!r}".format(pkt.SeqNo,pkt.Type,self.state),'red')
                 else:
-                    self.debug_logger("Wrong packet. Checksum:{!r}".format(pkt.Checksum),'red')
+                    self.debug_logger("Wrong packet. Seq:{!r}. Checksum:{!r}".format(pkt.SeqNo,pkt.Checksum),'red')
             else:
                 self.debug_logger("Wrong packet class type: {!r}".format(str(type(pkt))),'red')
 
@@ -82,12 +85,15 @@ class ServerProtocol(RIPPProtocol):
         self.debug_logger("Connection closed...",'red')
         self.higherProtocol().connection_lost(exc)
         self.transport = None
+        self.loop.stop()
 
-    def shutdown(self):
+    def shutdown(self,arg):
         self.debug_logger("Server is shutting down...",'red')
+        self.close_timers()
         self.state = self.SERVER_FIN_WAIT
-        #self.sendFin(self.transport)
         self.transport.close()
 
     def isClosing(self):
         return self.state == self.SERVER_FIN_WAIT or self.state == self.SERVER_CLOSED
+
+

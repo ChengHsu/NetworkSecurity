@@ -2,8 +2,9 @@ import asyncio
 from .RIPPPacket import RIPPPacket
 from .RIPPTransport import RIPPTransport
 from .RIPPProtocol import RIPPProtocol
-import time
+from .Timer import Timer
 
+import time
 
 class ClientProtocol(RIPPProtocol):
     def __init__(self):
@@ -22,6 +23,7 @@ class ClientProtocol(RIPPProtocol):
             self.state = self.CLIENT_SYN_SNT
 
     def data_received(self, data):
+        stop_timer = Timer(30, self.loop, self.shutdown, 0)
         self.deserializer.update(data)
         for pkt in self.deserializer.nextPackets():
             if isinstance(pkt, RIPPPacket):
@@ -34,9 +36,7 @@ class ClientProtocol(RIPPProtocol):
                                 self.recvSeq = pkt.SeqNo + 1
                                 self.sendAck(self.transport)
                                 higherTransport = RIPPTransport(self.transport,self)
-
                                 self.higherProtocol().connection_made(higherTransport)
-                                self.tasks.append(asyncio.ensure_future(self.checkTimeout()))
                             else:
                                 self.debug_logger("Received wrong SYN-ACK packet: Ack: {!r}, expected: {!r}".format(
                                     pkt.AckNo, self.sendSeq + 1),'red')
@@ -44,7 +44,7 @@ class ClientProtocol(RIPPProtocol):
                     elif ("DATA" in pkt.Type) and (self.state == self.CLIENT_ESTABLISHED):
                         self.recvDataPkt(pkt)
 
-                    elif ("ACK" in pkt.Type) and (self.state == self.CLIENT_ESTABLISHED):
+                    elif ("ACK" in pkt.Type) and (self.state != self.CLIENT_CLOSED ):
                         self.recvAckPkt(pkt)
 
                     elif (("FIN" in pkt.Type) and (self.state == self.CLIENT_ESTABLISHED)) or \
@@ -59,7 +59,7 @@ class ClientProtocol(RIPPProtocol):
                         self.transport.close()
 
                     elif ("FIN" in pkt.Type) and ("ACK" in pkt.Type) and (self.state == self.CLIENT_FIN_WAIT):
-                        # server's ack for client's fin
+                        # FIN-ACK
                         if pkt.AckNo == (self.sendSeq + 1):
                             self.debug_logger("Received FIN-ACK packet. Ack: {!r}".format(pkt.AckNo),'green')
                             self.state = self.CLIENT_CLOSED
@@ -68,7 +68,7 @@ class ClientProtocol(RIPPProtocol):
                     else:
                         self.debug_logger("Wrong packet. Seq: {!r}, Type {!r}".format(pkt.SeqNo, pkt.Type),'red')
                 else:
-                    self.debug_logger("Wrong packet checksum: {!r}".format(pkt.Checksum),'red')
+                    self.debug_logger("Wrong packet Seq:{!r}. checksum: {!r} ".format(pkt.SeqNo,pkt.Checksum),'red')
             else:
                 self.debug_logger("Wrong packet class type: {!r}".format(str(type(pkt))),'red')
 
@@ -76,13 +76,13 @@ class ClientProtocol(RIPPProtocol):
         self.debug_logger("Connection closed.",'red')
         self.higherProtocol().connection_lost(exc)
         self.transport = None
+        self.loop.stop()
 
-    def shutdown(self):
+    def shutdown(self,arg):
         self.debug_logger("Client is shutting down...",'red')
+        self.close_timers()
         self.state = self.CLIENT_FIN_WAIT
-        #self.sendFin(self.transport)
         self.transport.close()
-
 
     def isClosing(self):
         return self.state == self.CLIENT_FIN_WAIT or self.state == self.CLIENT_CLOSED
