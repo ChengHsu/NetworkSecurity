@@ -15,7 +15,7 @@ class RIPPProtocol(StackingProtocol):
     TIMEOUT = 0.5
     POP_TIMEOUT = 0.4
     MAX_TIMEOUT = 4
-    DEBUG_MODE = True
+    DEBUG_MODE = False
     MTU = 1500
 
     # State
@@ -166,7 +166,7 @@ class RIPPProtocol(StackingProtocol):
             current_time = time.time()
             if current_time - timestamp < self.MAX_TIMEOUT:
                 self.transport.write(dataPkt.__serialize__())
-                print("Resending data packet with SeqNo: " + str(dataPkt.SeqNo))
+                self.debug_logger("Retransmit data packet with SeqNo: " + str(dataPkt.SeqNo),'blue')
                 self.sentDataBuffer[ackNo] = (dataPkt, timestamp)
                 timer = Timer(self.TIMEOUT, self.loop, self.data_timeout, ackNo)
                 self.timer_dict[ackNo] = timer

@@ -16,7 +16,7 @@ class RIPPTransport(StackingTransport):
 	def force_to_pop(self):
 		if len(self.protocol.sendingDataBuffer) > 0:
 			(nextAck, dataPkt) = self.protocol.sendingDataBuffer.pop(0)
-			print("Seding data packet {} in sendingDataBuffer...".format(nextAck),'blue')
+			self.protocol.debug_logger("Sending data packet {} in sendingDataBuffer...".format(nextAck),'blue')
 			self.protocol.transport.write(dataPkt.__serialize__())
 			self.protocol.sentDataBuffer[nextAck] = (dataPkt, time.time())
 			timer = Timer(self.protocol.TIMEOUT,self.protocol.loop, self.protocol.data_timeout, nextAck)
