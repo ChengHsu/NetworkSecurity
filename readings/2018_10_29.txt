@@ -1,0 +1,5 @@
+1. I think one important thing about Bell-LaPadula is this model makes it difficult
+to accidentally release information from higher levels of security to lower levels.
+2. Bell-LaPadula: 'no read up" and "no read down'
+3. Biba: "no read down" and no write up"
+4. DAC: Anyone with access can propagte information. MAC: Security administrator can restrict propagation. 
