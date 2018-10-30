@@ -6,7 +6,7 @@ from .Timer import Timer
 
 from playground.network.common import StackingProtocol
 from .RIPPPacket import RIPPPacket
-from termcolor import colored
+#from termcolor import colored
 
 
 class RIPPProtocol(StackingProtocol):
@@ -15,7 +15,7 @@ class RIPPProtocol(StackingProtocol):
     TIMEOUT = 0.5
     POP_TIMEOUT = 0.4
     MAX_TIMEOUT = 4
-    DEBUG_MODE = False
+    DEBUG_MODE = True
     MTU = 1500
 
     # State
@@ -175,7 +175,8 @@ class RIPPProtocol(StackingProtocol):
 
     def debug_logger(self, text,color):
         if self.DEBUG_MODE:
-            print(colored(type(self).__name__ + ": " + text,color))
+            print(type(self).__name__ + ": " + text)
+            #print(colored(type(self).__name__ + ": " + text,color))
 
     def close_timers(self):
         self.debug_logger("Cancel all the timers.", 'green')
