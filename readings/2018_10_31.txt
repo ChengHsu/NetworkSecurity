@@ -1,0 +1,1 @@
+1.I realized that the main difference between XSS and CSRF is that CSRF happens in authenticated sessions when the server trusts the user/browser, while XSS doesn't need an authenticated session and can be exploited when the vulnerable website doesn't do the basics of validating or escaping input
