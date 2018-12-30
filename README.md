@@ -1,5 +1,6 @@
 # JHU - Network Security Fall 2018
 The project mainly contains documents and codes of two labs from network security class. The objective of this project is to design a "middleware" network over the simulated wire protocol defined by the [Playground project](https://github.com/CrimsonVista/Playground3) from Dr.Seth Neilson.
+
 The "middleware" network designs and implements two protocols which take inspiration from TCP and TLS 1.3 to provide reliable and secure data transmission separately.
 ## Lab1
 Lab1(RIPP protocol) is the simulation and implementation of TCP protocol. It provides relaible and error free data transmissions.
