@@ -14,4 +14,4 @@ mySithConnector = playground.Connector(protocolStack=(f_client, f_server))
 clientSithConnector = playground.Connector(protocolStack=f_client)
 serverSithConnector = playground.Connector(protocolStack=f_server)
 
-playground.setConnector("lab2_protocol", mySithConnector)
+playground.setConnector("lab2protocol", mySithConnector)
